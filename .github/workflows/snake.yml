@@ -1,0 +1,34 @@
+# Génère chaque jour l'animation du serpent qui parcourt le calendrier des contributions.
+# Le résultat est publié sur la branche "output", affichée dans le README.
+name: Animation des contributions
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # tous les jours vers 3 h (UTC)
+  workflow_dispatch: # lancement manuel possible depuis l'onglet Actions
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  generer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Générer les SVG
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/snake.svg
+            dist/snake-dark.svg?palette=github-dark
+
+      - name: Publier sur la branche output
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
